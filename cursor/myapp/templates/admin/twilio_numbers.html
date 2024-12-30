@@ -1,0 +1,62 @@
+{% extends "admin/base_site.html" %}
+
+{% block content %}
+<h1>Provider Numbers</h1>
+
+<!-- Dropdown for providers -->
+<select id="provider-dropdown">
+    <option value="" disabled selected>Select Provider</option>
+    <option value="twilio">Twilio</option>
+    <option value="exotel">Exotel</option>
+    <option value="plivo">Plivo</option>
+</select>
+
+<!-- Table to display the data -->
+<table>
+    <thead>
+        <tr>
+            <th>SID</th>
+            <th>Phone Number</th>
+            <th>Date Created</th>
+            <th>Date Updated</th>
+            <th>Capabilities</th>
+            <th>Only in Provider</th>
+        </tr>
+    </thead>
+    <tbody id="provider-data">
+        <!-- Data will be populated dynamically -->
+    </tbody>
+</table>
+
+<a href="{% url 'admin:index' %}" class="button">Back to Admin</a>
+
+<script>
+    document.getElementById('provider-dropdown').addEventListener('change', function() {
+    const provider = this.value;
+
+    // Fetch data dynamically via AJAX
+    fetch(`/fetch_provider_numbers/?provider=${provider}`)
+        .then(response => response.json())
+        .then(data => {
+            const tableBody = document.getElementById('provider-data');
+            tableBody.innerHTML = ''; // Clear existing data
+
+            data.forEach(item => {
+                const row = `
+                    <tr>
+                        <td>${item.sid}</td>
+                        <td>${item.phone_number}</td>
+                        <td>${item.date_created}</td>
+                        <td>${item.date_updated}</td>
+                        <td>${item.capabilities}</td>
+                        <td>${item.only_in_provider}</td>
+                    </tr>
+                `;
+                tableBody.insertAdjacentHTML('beforeend', row);
+            });
+        })
+        .catch(error => console.error('Error fetching data:', error));
+});
+
+</script>
+{% endblock %}
