@@ -3,15 +3,10 @@
 {% block content %}
 <h1>Provider Numbers</h1>
 
-<!-- Dropdown for providers -->
 <select id="provider-dropdown">
     <option value="" disabled selected>Select Provider</option>
-    <option value="twilio">Twilio</option>
-    <option value="exotel">Exotel</option>
-    <option value="plivo">Plivo</option>
 </select>
 
-<!-- Table to display the data -->
 <table>
     <thead>
         <tr>
@@ -28,35 +23,48 @@
     </tbody>
 </table>
 
-<a href="{% url 'admin:index' %}" class="button">Back to Admin</a>
-
 <script>
-    document.getElementById('provider-dropdown').addEventListener('change', function() {
-    const provider = this.value;
+    // Fetch providers dynamically and populate the dropdown
+    document.addEventListener("DOMContentLoaded", function () {
+        fetch('/fetch_data/')
+            .then(response => response.json())
+            .then(data => {
+                const dropdown = document.getElementById('provider-dropdown');
+                data.providers.forEach(provider => {
+                    const option = document.createElement('option');
+                    option.value = provider;
+                    option.textContent = provider.charAt(0).toUpperCase() + provider.slice(1); // Capitalize first letter
+                    dropdown.appendChild(option);
+                });
+            })
+            .catch(error => console.error('Error fetching providers:', error));
+    });
 
-    // Fetch data dynamically via AJAX
-    fetch(`/fetch_provider_numbers/?provider=${provider}`)
-        .then(response => response.json())
-        .then(data => {
-            const tableBody = document.getElementById('provider-data');
-            tableBody.innerHTML = ''; // Clear existing data
+    // Fetch provider-specific data when a provider is selected
+    document.getElementById('provider-dropdown').addEventListener('change', function () {
+        const provider = this.value;
 
-            data.forEach(item => {
-                const row = `
-                    <tr>
-                        <td>${item.sid}</td>
-                        <td>${item.phone_number}</td>
-                        <td>${item.date_created}</td>
-                        <td>${item.date_updated}</td>
-                        <td>${item.capabilities}</td>
-                        <td>${item.only_in_provider}</td>
-                    </tr>
-                `;
-                tableBody.insertAdjacentHTML('beforeend', row);
-            });
-        })
-        .catch(error => console.error('Error fetching data:', error));
-});
+        fetch(`/fetch_data/?provider=${provider}`)
+            .then(response => response.json())
+            .then(data => {
+                const tableBody = document.getElementById('provider-data');
+                tableBody.innerHTML = ''; // Clear existing data
 
+                data.forEach(item => {
+                    const row = `
+                        <tr>
+                            <td>${item.sid}</td>
+                            <td>${item.phone_number}</td>
+                            <td>${item.date_created}</td>
+                            <td>${item.date_updated}</td>
+                            <td>${item.capabilities}</td>
+                            <td>${item.only_in_provider}</td>
+                        </tr>
+                    `;
+                    tableBody.insertAdjacentHTML('beforeend', row);
+                });
+            })
+            .catch(error => console.error('Error fetching data:', error));
+    });
 </script>
 {% endblock %}

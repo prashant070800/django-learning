@@ -72,9 +72,9 @@ def fetch_twilio_numbers(request):
 from django.shortcuts import render
 from django.contrib.admin.views.decorators import staff_member_required
 
-@staff_member_required
 def fetch_provider_data(request):
     # Hardcoded providers for the dropdown
+    print(request.method,"********************************")
     providers = ["twilio", "plivo", "exotel"]
 
     # Handle the POST request when a provider is selected
@@ -114,6 +114,55 @@ def fetch_provider_numbers(request):
     provider = request.GET.get('provider')
     data = []
 
+    if provider == 'twilio':
+        data = [
+            {
+                "sid": "twilio-sid-1",
+                "phone_number": "+1234567890",
+                "date_created": datetime.datetime.now(),
+                "date_updated": datetime.datetime.now(),
+                "capabilities": "call/sms",
+                "only_in_provider": True,
+            }
+        ]
+    elif provider == 'exotel':
+        data = [
+            {
+                "sid": "exotel-sid-1",
+                "phone_number": "+1987654321",
+                "date_created": datetime.datetime.now(),
+                "date_updated": datetime.datetime.now(),
+                "capabilities": "call",
+                "only_in_provider": False,
+            }
+        ]
+    elif provider == 'plivo':
+        data = [
+            {
+                "sid": "plivo-sid-1",
+                "phone_number": "+1123456789",
+                "date_created": datetime.datetime.now(),
+                "date_updated": datetime.datetime.now(),
+                "capabilities": "sms",
+                "only_in_provider": True,
+            }
+        ]
+
+    return JsonResponse(data, safe=False)
+
+from django.http import JsonResponse
+import datetime
+
+def fetch_data(request):
+    provider = request.GET.get('provider')
+
+    if not provider:
+        # If no provider is specified, return the list of providers
+        providers = ["plivo", "twilio", "exotel"]
+        return JsonResponse({"providers": providers})
+
+    # If a provider is specified, return the data for that provider
+    data = []
     if provider == 'twilio':
         data = [
             {
