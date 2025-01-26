@@ -36,3 +36,16 @@ class CustomUser(AbstractUser):
 
     def __str__(self):
         return self.email
+
+
+
+class Call(models.Model):
+    fron_number = models.CharField(max_length=20)
+    to_number = models.CharField(max_length=20)
+    sid = models.CharField(max_length=100)
+
+class Sim(models.Model):
+    sim_number = models.CharField(max_length=20)
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    uid = models.CharField(max_length=100)
+
